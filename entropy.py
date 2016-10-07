@@ -1,6 +1,8 @@
 from Tkinter import *
 from PacketCapture import PacketCapture
 from EntropyDataManager import EntropyDataManager
+from tkFileDialog import askopenfilename
+from tkFileDialog import asksaveasfilename
 
 # Packet Capture Program
 # This GUI uses our PacketCapture class
@@ -14,6 +16,18 @@ class EntropyGUI:
         root = Tk()  # Create Window
 
         root.title("Packet Capture")
+
+        # Add drop down menu
+        menubar = Menu(root)
+        root.config(menu=menubar)
+
+        # create a pulldown menu, and add it to the menu bar
+        operationMenu = Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="File", menu=operationMenu)
+        operationMenu.add_command(label="Open",
+                                  command=self.openFile)
+        operationMenu.add_command(label="Save",
+                                  command=self.saveFile)
 
         Label(root, text="This program will capture a single packet and display the raw data below").pack()
 
@@ -72,6 +86,20 @@ class EntropyGUI:
             self.pc.capturePackets(host, int(numPackets))
             myList = self.pc.getPacketList()
             for p in myList:
-                self.textArea.insert(END, p)       
+                self.textArea.insert(END, p)
+
+    def openFile(self):
+        filenameforReading = askopenfilename()
+        dataManager = EntropyDataManager(filenameforReading)
+        newText = dataManager.openFile()
+        # clear any current text and place loaded text
+        self.textArea.delete(1.0, 'end')
+        self.textArea.insert(1.0, newText)
+
+    def saveFile(self):
+        filenameforWriting = asksaveasfilename()
+        dataManager = EntropyDataManager(filenameforWriting)
+        saveText = self.textArea.get(1.0, 'end-1c')  # end-1c prevents final newline character from being saved to file
+        dataManager.saveFile(saveText)
 
 EntropyGUI()  # Create the GUI
