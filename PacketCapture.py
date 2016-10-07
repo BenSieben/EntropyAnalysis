@@ -13,7 +13,7 @@ class PacketCapture:
         self.ipAddr = ""
         
     def capturePackets(self, ipAddr):
-        host = ipAddr
+        self.ipAddr = ipAddr
 
         # create a raw socket and bind it to the public interface
         if os.name == "nt":
@@ -23,7 +23,7 @@ class PacketCapture:
 
         sniffer = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket_protocol)
 
-        sniffer.bind((host, 0))
+        sniffer.bind((self.ipAddr, 0))
 
         # we want the IP headers included in the capture
         sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
