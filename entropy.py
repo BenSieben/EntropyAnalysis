@@ -8,7 +8,7 @@ from PacketCapture import PacketCapture
 class EntropyGUI:
     def __init__(self):
         
-        #self.pc = PacketCapture()
+        self.pc = PacketCapture()
 
         root = Tk()  # Create Window
 
@@ -28,6 +28,12 @@ class EntropyGUI:
         self.textEntry = Entry(root, textvariable = self.ipAddr)
         self.textEntry.pack()
         
+        # Enter number of packets to capture
+        Label(root, text="Enter number of packets to capture").pack()
+        self.numPackts = StringVar()
+        self.numPacktsEntry = Entry(root, textvariable = self.numPackts)
+        self.numPacktsEntry.pack()
+        
         # Button to trigger the packet capture
         button = Button(root)
         button.configure(text="Capture Packet")
@@ -40,6 +46,7 @@ class EntropyGUI:
         scrollbar.pack(side=RIGHT, fill=Y)
 
         self.textArea = Text(root)
+        self.textArea.configure(width=150, height=40)
         self.textArea.pack()
 
         scrollbar.config(command=self.textArea.yview)
@@ -50,6 +57,10 @@ class EntropyGUI:
     # Packet" button
     def buttonClickCallback(self, event):
         host = self.ipAddr.get()
+        numPackets = self.numPackts.get()
+        
+        if numPackets == "":
+            numPackets = "1" # default value
         
         # Make sure an IP address was entered
         # This validity check must be improved
@@ -57,10 +68,9 @@ class EntropyGUI:
             self.textArea.insert(INSERT, "You must enter a valid IP address\n")
             return
         else:
-            pc = PacketCapture()
-            pc.capturePackets(host)
-            myList = pc.getPacketList()
+            self.pc.capturePackets(host, int(numPackets))
+            myList = self.pc.getPacketList()
             for p in myList:
-                self.textArea.insert(END, p)        
+                self.textArea.insert(END, p)       
 
 EntropyGUI()  # Create the GUI
