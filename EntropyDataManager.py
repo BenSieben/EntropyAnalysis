@@ -23,24 +23,24 @@ class EntropyDataManager:
         json.dump(data, f)
 
 # testing the class
-e = EntropyDataManager("test.txt")
-data = [["1", 3], ["a", "b", "cccc", 50]]
-print(data)
-e.saveFile(data)
-savedData = e.openFile()
-print(savedData)
-print(savedData[1][1])
-print(type(savedData[1][1]))
-if data[1][1] == savedData[1][1]:
-    print("saved string matches original string")
-
-# testing if this still works on Packet class
-edm = EntropyDataManager("test2.txt")
-packetData = []
-for i in range(0, 10):
-    p = Packet("Site " + str(i), "Head " + str(i), "Body " + str(i), i)
-    packetData.append(p)
-print(packetData[2])
+# e = EntropyDataManager("test.txt")
+# data = [["1", 3], ["a", "b", "cccc", 50]]
+# print(data)
+# e.saveFile(data)
+# savedData = e.openFile()
+# print(savedData)
+# print(savedData[1][1])
+# print(type(savedData[1][1]))
+# if data[1][1] == savedData[1][1]:
+#     print("saved string matches original string")
+#
+# # testing if this still works on Packet class
+# edm = EntropyDataManager("test2.txt")
+# packetData = []
+# for i in range(0, 10):
+#     p = Packet("Site " + str(i), "Head " + str(i), "Body " + str(i), i)
+#     packetData.append(p)
+# print(packetData[2])
 # this will FAIL; Packet objects are not considered JSON serializable
 # edm.saveFile(packetData)
 # for p in packetData:
