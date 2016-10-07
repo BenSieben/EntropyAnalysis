@@ -1,5 +1,6 @@
 from Tkinter import *
 from PacketCapture import PacketCapture
+from EntropyDataManager import EntropyDataManager
 
 # Packet Capture Program
 # This GUI uses our PacketCapture class
