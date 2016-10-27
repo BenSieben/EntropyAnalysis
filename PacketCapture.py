@@ -1,6 +1,8 @@
 import socket
 import os
 import struct
+from PacketAnalyzer import *
+from IP import *
 
 # A Class to capture network packets
 # Captured raw packets are stored as strings in the self.packets list
@@ -10,6 +12,7 @@ class PacketCapture:
         self.packets = [""]
         self.ipAddr = ""
         self.numPackets = 0
+        self.pa = PacketAnalyzer()
 
     #Capture Packets and add to list    
     def capturePackets(self, ipAddr, numPackets):
@@ -28,7 +31,7 @@ class PacketCapture:
         sniffer.bind((self.ipAddr, 0))
 
         # we want the IP headers included in the capture
-        #sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+        sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
 
         # if we're on Windows we need to send an IOCTL
         # to setup promiscuous mode
@@ -38,14 +41,26 @@ class PacketCapture:
         # read in a specified number of ethernet frames
         for i in range(self.numPackets):
             # Recieve packet
-            rawPacket = sniffer.recvfrom(65565)
+            rawPacket = sniffer.recvfrom(65565)[0]
+            
+            # create an IP header from the first 20 bytes of the buffer
+            ip_header = IP(rawPacket[0:20])
+        
+            if ip_header.dst_address == self.ipAddr:
+                print "destination address: " + ip_header.dst_address + "\n"
+            
+            packetInfo = "Protocol: %s %s -> %s" % (ip_header.protocol, ip_header.src_address, ip_header.dst_address)            
                         
             # add data part to list - data starts at byte 14 of ethernet frame
-            self.packets.append(str(rawPacket[:14]) + "\n") #TODO - remove "\n"
+            #self.packets.append(str(rawPacket[:14]) + "\n") #TODO - remove "\n"
+            self.packets.append(packetInfo + "\n")
+            
+            #self.pa.filterPackets(rawPacket)
 
         # if we're on Windows turn off promiscuous mode
         if os.name == "nt":
             sniffer.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)
+            
                         
     def getPacketList(self):
         return self.packets
