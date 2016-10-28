@@ -2,27 +2,25 @@ import socket
 import os
 import struct
 from ctypes import *
-# Filters raw packet captures, converts data into binary form,
-# and performs entropy analysis on binary packet data.
+# Converts data into binary form
+# and performs entropy analysis on packet data.
 
 class PacketAnalyzer:
     def __init__(self):
         self.entropyResult = 0;
-    
-    # Converts a list of raw packet captures into a filtered
-    # list of packet captures.
-    # rawPackets is a list of raw packet captures
-    # Returns the filtered form of the list
-    def filterPackets(self, rawPackets):
-        print"Analyzing packets"
-    
-    # Converts a list of filtered packet data into binary
-    # filteredPackets is a list of filtered packet data
+        
+    # Converts a list of packet payloads into a list of binarys
     # Returns the binary form of the list
-    def convertToBinary(self, filteredPackets):
-        pass
+    def convertToBinary(self, packets):
+        # Convert a character into it's ascii numeric value
+        asciiValue = ord("A")
+        # Convert decimal number into binary
+        binary = format(asciiValue, '08b')
+        
+        print "binary of A is" + str(binary)
+        print "Converting each packet into binary string\n"
+
     
-    # Analyzes the binary form of the packet data using
     # Shannon's Entropoy algorithm
     def entropyAnalysis(self, binaryPacketData):
-        pass
+        print "Performing Entropy analysis\n"
