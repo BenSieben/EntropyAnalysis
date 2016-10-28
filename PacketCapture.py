@@ -37,25 +37,35 @@ class PacketCapture:
         # to setup promiscuous mode
         if os.name == "nt":
             sniffer.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
-            
+
+        num = 0 # Keep track of packets going to clients machine
+        
         # read in a specified number of ethernet frames
-        for i in range(self.numPackets):
+        while num < self.numPackets:
             # Recieve packet
             rawPacket = sniffer.recvfrom(65565)[0]
             
             # create an IP header from the first 20 bytes of the buffer
             ip_header = IP(rawPacket[0:20])
         
+            # If the packet is destined for clients machine add it to list
             if ip_header.dst_address == self.ipAddr:
-                print "destination address: " + ip_header.dst_address + "\n"
-            
-            packetInfo = "Protocol: %s %s -> %s" % (ip_header.protocol, ip_header.src_address, ip_header.dst_address)            
-                        
-            # add data part to list - data starts at byte 14 of ethernet frame
-            #self.packets.append(str(rawPacket[:14]) + "\n") #TODO - remove "\n"
-            self.packets.append(packetInfo + "\n")
-            
-            #self.pa.filterPackets(rawPacket)
+                num += 1
+                # Convert packet payload to string and add to packet list
+                # Ethernet Header of frame is 14 bytes
+                # IP Header is 20 bytes
+                # Packet payload starts after byte 34
+                self.packets.append(repr(rawPacket[34:]))
+                
+                # Print packet info for debug/testing purposes comment out later
+                packetInfo = "Protocol: %s %s -> %s" % (ip_header.protocol, \
+                                                        ip_header.src_address, \
+                                                        ip_header.dst_address)
+                print packetInfo
+                      
+        # Perform entropy analysis of packets    
+        self.pa.entropyAnalysis(self.packets)
+        
 
         # if we're on Windows turn off promiscuous mode
         if os.name == "nt":

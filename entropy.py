@@ -3,6 +3,7 @@ from PacketCapture import PacketCapture
 from EntropyDataManager import EntropyDataManager
 from tkFileDialog import askopenfilename
 from tkFileDialog import asksaveasfilename
+import socket
 
 # Packet Capture Program
 # This GUI uses our PacketCapture class
@@ -12,7 +13,7 @@ class EntropyGUI:
     def __init__(self):
         
         self.pc = PacketCapture()
-
+        
         root = Tk()  # Create Window
 
         root.title("Packet Capture")
@@ -29,7 +30,7 @@ class EntropyGUI:
         operationMenu.add_command(label="Save",
                                   command=self.saveFile)
 
-        Label(root, text="This program will capture a single packet and display the raw data below").pack()
+        Label(root, text="This program will capture a packet/s and display the raw data below").pack()
 
         Label(root, text="There needs to be network traffic so open a command prompt and execute a ping").pack()
 
@@ -39,8 +40,10 @@ class EntropyGUI:
         Label(root, text="Enter Host IP").pack()
         
         # Entrybox to get the host IP
-        self.ipAddr = StringVar()
-        self.textEntry = Entry(root, textvariable = self.ipAddr)
+        self.hostIP = StringVar()
+        ip = socket.gethostbyname(socket.gethostname())
+        self.textEntry = Entry(root, textvariable = self.hostIP)
+        self.textEntry.insert(END, ip) #enter host IP in text entry box
         self.textEntry.pack()
         
         # Enter number of packets to capture
@@ -71,7 +74,7 @@ class EntropyGUI:
     #Callback method activated when the left mouse key clicks the  "Capture
     # Packet" button
     def buttonClickCallback(self, event):
-        host = self.ipAddr.get()
+        host = self.hostIP.get()
         numPackets = self.numPackts.get()
         
         if numPackets == "":
