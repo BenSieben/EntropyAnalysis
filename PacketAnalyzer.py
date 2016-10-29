@@ -7,7 +7,7 @@ from ctypes import *
 
 class PacketAnalyzer:
     def __init__(self):
-        self.entropyResult = 0;
+        self.entropyResult = 0
     
     # Converts a list of filtered packet data into binary form
     # filteredPackets is a list of filtered packet data
@@ -38,6 +38,6 @@ class PacketAnalyzer:
                 byteString += '0'  # put 0 as bit if it numRemaining was too small
         return byteString
 
-    # Shannon's Entropoy algorithm
+    # Shannon's Entropy algorithm
     def entropyAnalysis(self, binaryPacketData):
         print "Performing Entropy analysis\n"
