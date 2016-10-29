@@ -49,9 +49,3 @@ class PacketAnalyzer:
     # Shannon's Entropoy algorithm
     def entropyAnalysis(self, binaryPacketData):
         pass
-
-pa = PacketAnalyzer()
-filteredPackets = ['hello', 'world', 'test', '!@#*USDI']
-convertToBinary = pa.convertToBinary(filteredPackets)
-print(filteredPackets)
-print(convertToBinary)
