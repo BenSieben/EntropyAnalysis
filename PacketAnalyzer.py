@@ -1,4 +1,6 @@
+from __future__ import division
 import socket
+import math
 
 import os
 
@@ -77,9 +79,53 @@ class PacketAnalyzer:
         return byteString
 
 
+    def getNumericList(self, packetData):
+        numericList = []
+        
+        # Turn packetData into string
+        s = "".join(packetData)
+
+        # Turn each character in string into a decimal number
+        for n in s:
+            numericList.append(ord(n))
+
+        return numericList
+    
+    def hist(self,source):
+        hist = {}
+        l = 0
+        for e in source:
+            l += 1
+            if e not in hist:
+                hist[e] = 0
+            hist[e] += 1
+        return(l, hist)
 
     # Shannon's Entropy algorithm
+    def determineEntropy(self, hist, l):
+        elist = []
+        for v in hist.values():
+            c = v / l
+            elist.append(-c * math.log(c, 2))
+        return sum(elist)
+    
+    def printHist(self, h, l):
+        flip = lambda(k,v) : (v,k)
+        h = sorted(h.iteritems(), key = flip)
+        print 'Sym\thi\tfi\tInf'
+        for(k,v) in h:
+            print '%s\t%f\t%f\t%f'%(k,v,v/l,-math.log(v/l, 2))
+    
 
-    def entropyAnalysis(self, binaryPacketData):
-
+    def entropyAnalysis(self, packetData):
         print "Performing Entropy analysis\n"
+        
+        # Turn the packetData into decimal values
+        numList = self.getNumericList(packetData)
+        
+        # print the number list as a string
+        print repr(numList)
+        (l,h) = self.hist(numList)
+        #self.determineEntropy(h,l)
+        print "Entropy:", self.determineEntropy(h,l)
+        self.printHist(h, l)
