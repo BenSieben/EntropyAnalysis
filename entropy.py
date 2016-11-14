@@ -52,6 +52,13 @@ class EntropyGUI:
         self.numPacktsEntry = Entry(root, textvariable = self.numPackts)
         self.numPacktsEntry.pack()
         
+        # Entropy Result
+        Label(root, text="Entropy Result").pack()
+        self.entropyResult = StringVar()
+        self.entropyResultEntry = Entry(root, textvariable = self.entropyResult)
+        self.entropyResultEntry.pack()
+
+        
         # Button to trigger the packet capture
         button = Button(root)
         button.configure(text="Capture Packet")
@@ -86,7 +93,8 @@ class EntropyGUI:
             self.textArea.insert(INSERT, "You must enter a valid IP address\n")
             return
         else:
-            self.pc.capturePackets(host, int(numPackets))
+            eResult = self.pc.capturePackets(host, int(numPackets))
+            self.entropyResultEntry.insert(0,eResult)
             myList = self.pc.getPacketList()
             for p in myList:
                 self.textArea.insert(END, p)

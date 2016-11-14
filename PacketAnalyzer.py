@@ -127,3 +127,4 @@ class PacketAnalyzer:
         #self.determineEntropy(h,l)
         print "Entropy:", self.determineEntropy(h,l)
         self.printHist(h, l)
+        return self.determineEntropy(h,l)
