@@ -64,12 +64,14 @@ class PacketCapture:
                 print packetInfo
                       
         # Perform entropy analysis of packets    
-        self.pa.entropyAnalysis(self.packets)
+        entropyResult = self.pa.entropyAnalysis(self.packets)
         
 
         # if we're on Windows turn off promiscuous mode
         if os.name == "nt":
             sniffer.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)
+        
+        return entropyResult
             
                         
     def getPacketList(self):
