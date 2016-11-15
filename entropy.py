@@ -4,18 +4,26 @@ from EntropyDataManager import EntropyDataManager
 from tkFileDialog import askopenfilename
 from tkFileDialog import asksaveasfilename
 import socket
+import threading
 
 # Packet Capture Program
 # This GUI uses our PacketCapture class
 
 
+class GUIThread(threading.Thread):
+	def __init__(self):
+		threading.Thread.__init__(self)
+
+	def run(self):
+		print "Running"
+
 class EntropyGUI:
     def __init__(self):
         
-        self.pc = PacketCapture()
-        
+        self.pc = PacketCapture()        
         root = Tk()  # Create Window
-
+        self.mt = GUIThread()
+        self._running = True
         root.title("Packet Capture")
 
         # Add drop down menu
@@ -41,7 +49,7 @@ class EntropyGUI:
         
         # Entrybox to get the host IP
         self.hostIP = StringVar()
-        ip = socket.gethostbyname(socket.gethostname())
+        ip = socket.gethostbyname(socket.gethostname())        
         self.textEntry = Entry(root, textvariable = self.hostIP)
         self.textEntry.insert(END, ip) #enter host IP in text entry box
         self.textEntry.pack()
@@ -64,7 +72,15 @@ class EntropyGUI:
         button.configure(text="Capture Packet")
         button.bind("<Button-1>", self.buttonClickCallback)
         button.pack()
-        Label(root, text="").pack()  # Spacer        
+        Label(root, text="").pack()  # Spacer   
+
+
+        # Button to cancel the packet capture
+        cancel = Button(root)
+        cancel.configure(text="Cancel")
+        cancel.bind("<Button-2>", self.cancelButtonClickCallback)
+        cancel.pack()
+        Label(root, text="").pack()  # Spacer      
 
         # include a Scrollbar to connect to the Text where all the packets get printed
         scrollbar = Scrollbar(root)
@@ -93,11 +109,25 @@ class EntropyGUI:
             self.textArea.insert(INSERT, "You must enter a valid IP address\n")
             return
         else:
-            eResult = self.pc.capturePackets(host, int(numPackets))
-            self.entropyResultEntry.insert(0,eResult)
-            myList = self.pc.getPacketList()
-            for p in myList:
-                self.textArea.insert(END, p)
+        		
+        		self.mt.start()
+        		self.check_thread()
+        		while self._running:
+        			eResult = self.pc.capturePackets(host, int(numPackets))
+        			self.entropyResultEntry.insert(0,eResult)
+        			myList = self.pc.getPacketList()
+        			for p in myList:
+        				self.textArea.insert(END, p)
+
+    def check_thread(self):
+        # Still alive? Check again in half a second
+        if self.mt.isAlive():
+        		threading.Timer(500, self.check_thread)            
+        else:
+            print "Ended"
+    def cancelButtonClickCallback(self, event):
+    	self._running = False
+    	self.mt.join()
 
     def openFile(self):
         filenameforReading = askopenfilename()
@@ -114,3 +144,5 @@ class EntropyGUI:
         dataManager.saveFile(saveText)
 
 EntropyGUI()  # Create the GUI
+
+
