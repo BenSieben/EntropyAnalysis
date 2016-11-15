@@ -9,7 +9,6 @@ import threading
 # Packet Capture Program
 # This GUI uses our PacketCapture class
 
-
 class GUIThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
