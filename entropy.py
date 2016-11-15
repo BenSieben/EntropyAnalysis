@@ -19,7 +19,6 @@ class GUIThread(threading.Thread):
 
 class EntropyGUI:
     def __init__(self):
-        
         self.pc = PacketCapture()        
         root = Tk()  # Create Window
         self.mt = GUIThread()
