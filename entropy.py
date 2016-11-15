@@ -11,11 +11,11 @@ import threading
 
 
 class GUIThread(threading.Thread):
-	def __init__(self):
-		threading.Thread.__init__(self)
+    def __init__(self):
+        threading.Thread.__init__(self)
 
-	def run(self):
-		print "Running"
+    def run(self):
+        print "Running"
 
 class EntropyGUI:
     def __init__(self):
@@ -109,25 +109,25 @@ class EntropyGUI:
             self.textArea.insert(INSERT, "You must enter a valid IP address\n")
             return
         else:
-        		
-        		self.mt.start()
-        		self.check_thread()
-        		while self._running:
-        			eResult = self.pc.capturePackets(host, int(numPackets))
-        			self.entropyResultEntry.insert(0,eResult)
-        			myList = self.pc.getPacketList()
-        			for p in myList:
-        				self.textArea.insert(END, p)
+                
+                self.mt.start()
+                self.check_thread()
+                while self._running:
+                    eResult = self.pc.capturePackets(host, int(numPackets))
+                    self.entropyResultEntry.insert(0,eResult)
+                    myList = self.pc.getPacketList()
+                    for p in myList:
+                        self.textArea.insert(END, p)
 
     def check_thread(self):
         # Still alive? Check again in half a second
         if self.mt.isAlive():
-        		threading.Timer(500, self.check_thread)            
+                threading.Timer(500, self.check_thread)            
         else:
             print "Ended"
     def cancelButtonClickCallback(self, event):
-    	self._running = False
-    	self.mt.join()
+        self._running = False
+        self.mt.join()
 
     def openFile(self):
         filenameforReading = askopenfilename()
@@ -144,5 +144,4 @@ class EntropyGUI:
         dataManager.saveFile(saveText)
 
 EntropyGUI()  # Create the GUI
-
 
