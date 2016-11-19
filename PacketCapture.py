@@ -71,8 +71,11 @@ class PacketCapture:
         if os.name == "nt":
             sniffer.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)
         
-        return entropyResult
+        return self.pa.getEntropyResult()
             
                         
     def getPacketList(self):
         return self.packets
+
+    def getStats(self):
+        return self.pa.getStatistics()

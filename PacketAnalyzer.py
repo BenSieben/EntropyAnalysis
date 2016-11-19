@@ -18,6 +18,7 @@ class PacketAnalyzer:
 
 
         self.entropyResult = 0
+        self.eStatistics = ""
     
 
     # Converts a list of filtered packet data into binary form
@@ -110,8 +111,10 @@ class PacketAnalyzer:
     def printHist(self, h, l):
         flip = lambda(k,v) : (v,k)
         h = sorted(h.iteritems(), key = flip)
+        self.eStatistics += 'Sym\thi\tfi\tInf\n'
         print 'Sym\thi\tfi\tInf'
         for(k,v) in h:
+            self.eStatistics += '%s\t%f\t%f\t%f'%(k,v,v/l,-math.log(v/l, 2)) + "\n"
             print '%s\t%f\t%f\t%f'%(k,v,v/l,-math.log(v/l, 2))
     
 
@@ -122,9 +125,17 @@ class PacketAnalyzer:
         numList = self.getNumericList(packetData)
         
         # print the number list as a string
-        print repr(numList)
+        #print repr(numList)
         (l,h) = self.hist(numList)
         #self.determineEntropy(h,l)
-        print "Entropy:", self.determineEntropy(h,l)
-        self.printHist(h, l)
-        return self.determineEntropy(h,l)
+        #self.eStatistics += "\nEntropy:" + repr(self.determineEntropy(h,l)) + "\n"
+        #print "Entropy:", self.determineEntropy(h,l)
+        #self.printHist(h, l)
+        self.entropyResult = self.determineEntropy(h,l)
+        return self.entropyResult
+    
+    def getEntropyResult(self):
+        return self.entropyResult
+    
+    def getStatistics(self):
+        return self.eStatistics
