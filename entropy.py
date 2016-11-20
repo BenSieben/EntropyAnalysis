@@ -1,5 +1,6 @@
 import Tkinter
 from Tkinter import *
+import tkMessageBox
 import time
 import random
 import Queue
@@ -33,6 +34,8 @@ class EntropyGUI:
                                   command=self.openFile)
         operationMenu.add_command(label="Save",
                                   command=self.saveFile)
+        operationMenu.add_command(label='Exit', accelerator='Alt+F4', 
+                                  command=self.exitProgram)
         
         # Add a frame to hold seperator
         frame0 = Frame(root) # Create and add a frame to window
@@ -118,9 +121,13 @@ class EntropyGUI:
     def buttonClickCallback(self, event):
         self.numPackets = self.numPackts.get()
         self.tc.getEntropyResult()
+        
+    def exitProgram(self, event=None):
+        if tkMessageBox.askokcancel("Quit?", "Really quit?"):
+            root.destroy()    
                 
     def cancelButtonEvent(self, event):
-        self.master.destroy()
+        self.tc.killThread()
 
     def openFile(self):
         filenameforReading = askopenfilename()
@@ -181,9 +188,15 @@ class ThreadedClient:
         
     def getEntropyResult(self):
         self.inEntropyMode = True
-        print"In getEntropyResult " + repr(self.inEntropyMode)    
+        print"In getEntropyResult " + repr(self.inEntropyMode)
         
-
+    # Kills thread when cancel button clicked in GUI
+    # There's no way of killing thread from outside
+    # Must create extended thread class that has the ability to
+    # be terminated from outside the thread
+    def killThread(self):
+        pass
+        
     def periodicCall(self):
         """
         Check every 200 ms if there is something new in the queue.
