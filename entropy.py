@@ -119,6 +119,7 @@ class EntropyGUI:
     #Callback method activated when the left mouse key clicks the  "Capture
     # Packet" button
     def buttonClickCallback(self, event):
+        self.host = self.textEntry.get()
         self.numPackets = self.numPackts.get()
         self.tc.getEntropyResult()
         
@@ -188,7 +189,7 @@ class ThreadedClient:
         
     def getEntropyResult(self):
         self.inEntropyMode = True
-        print"In getEntropyResult " + repr(self.inEntropyMode)
+        print"My IP is " + str(self.gui.host) + " In getEntropyResult " + repr(self.inEntropyMode)
         
     # Kills thread when cancel button clicked in GUI
     # There's no way of killing thread from outside
