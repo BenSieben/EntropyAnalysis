@@ -218,7 +218,8 @@ class ThreadedClient:
         while self.running:
             eResult = ""
             if self.inEntropyMode:
-                ip = socket.gethostbyname(socket.gethostname())
+                #ip = socket.gethostbyname(socket.gethostname())
+                ip = socket.gethostbyname(self.gui.host)
                 eResult = self.pc.capturePackets(ip, int(self.gui.numPackets))
             
             # yield control to GUI. May need to fine tune this pause
