@@ -1,9 +1,11 @@
 import Tkinter
 from Tkinter import *
+from ttk import *
 import tkMessageBox
 import time
 import random
 import Queue
+import re
 from PacketCapture import PacketCapture
 from EntropyDataManager import EntropyDataManager
 from tkFileDialog import askopenfilename
@@ -62,20 +64,27 @@ class EntropyGUI:
         Label(frame0, text=" ").grid(row=1, column=1, sticky=W)          
                 
         ##### Frame 1 Contents ####
-        Label(frame1, text="           ").grid(row=1, column=1, sticky=W)
-        Label(frame1, text="Enter Host IP").grid(row=1, column=2)
-        Label(frame1, text="                  ").grid(row=1, column=3, sticky=W)
+        Label(frame1, text="            ").grid(row=1, column=1, sticky=W)
+        Label(frame1, text="Select Host IP").grid(row=1, column=2)
+        Label(frame1, text="                       ").grid(row=1, column=3, sticky=W)
         Label(frame1, text="Number of Packets").grid(row=1, column=4, sticky=W)
         
         #### Frame 2 Contents ####
         Label(frame2, text="            ").grid(row=1, column=1, sticky=W)
         # Entrybox to get the host IP
         self.hostIP = StringVar()
-        ip = socket.gethostbyname(socket.gethostname())
-        self.textEntry = Entry(frame2, textvariable = self.hostIP)
+        # Find all IP addresses connected to outside world
+        ipAddresses = [i[4][0] for i in socket.getaddrinfo(socket.gethostname(), None)]
+        # Take the IPv4 addresses only (packet capture code fails for IPv6 addresses)
+        ipv4Addresses = []
+        pattern = re.compile("^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
+        for address in ipAddresses:
+            if pattern.match(address) is not None:
+                ipv4Addresses.append(address)
+        self.textEntry = Combobox(frame2, textvariable = self.hostIP, state = 'readonly', values = ipv4Addresses)
         self.textEntry.grid(row=1, column=2, sticky=W)
-        self.textEntry.insert(END, ip) #enter host IP in text entry box
-        
+        self.textEntry.current(0)
+
         # Spacer
         Label(frame2, text=" ").grid(row=1, column=3, sticky=W)        
         
@@ -218,7 +227,6 @@ class ThreadedClient:
         while self.running:
             eResult = ""
             if self.inEntropyMode:
-                #ip = socket.gethostbyname(socket.gethostname())
                 ip = socket.gethostbyname(self.gui.host)
                 eResult = self.pc.capturePackets(ip, int(self.gui.numPackets))
             
