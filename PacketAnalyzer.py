@@ -77,7 +77,8 @@ class PacketAnalyzer:
 
         return byteString
 
-
+    # Converts the packets ascii values into their decimal values
+    # and returns them in a list
     def getNumericList(self, packetData):
         numericList = []
         
@@ -90,6 +91,8 @@ class PacketAnalyzer:
 
         return numericList
     
+    # Keeps track of how many times a value in the
+    # map has occured
     def hist(self,source):
         hist = {}
         l = 0
@@ -124,13 +127,10 @@ class PacketAnalyzer:
         # Turn the packetData into decimal values
         numList = self.getNumericList(packetData)
         
-        # print the number list as a string
-        #print repr(numList)
+        # Gets the number of occurences of each value in the list
         (l,h) = self.hist(numList)
-        #self.determineEntropy(h,l)
-        #self.eStatistics += "\nEntropy:" + repr(self.determineEntropy(h,l)) + "\n"
-        #print "Entropy:", self.determineEntropy(h,l)
-        #self.printHist(h, l)
+        
+        # Runs the Entropy algorithm on the list
         self.entropyResult = self.determineEntropy(h,l)
         return self.entropyResult
     
