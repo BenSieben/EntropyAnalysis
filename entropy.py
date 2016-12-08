@@ -13,13 +13,29 @@ from tkFileDialog import asksaveasfilename
 import socket
 import threading
 
+# CS160 Fall 2016 Project
+# Project Name: Entropy Analysis
+# Group Members: Frank Mock, Ben Sieben, Henry Spivey, John Mai, Dennis Dolorfo
 
-# This program calculates Shannon's entropy on captured packets
 
+# This program calculates Shannon's entropy on captured packets.
+# EntropyGUI is the main GUI for this program. It uses a worker
+# thread that captures packets and computes the entropy result.
+# This allows the GUI to still respons to user events.
+# The program will automatically determin the host IP. The user
+# must enter the number of packets to analyze and then press
+# the 'Capture' button. The entropy result will be displayed.
+# The user can save the results that are displayed into a text
+# file.
 class EntropyGUI:
     def __init__(self, root, queue, endCommand, threadClient):
+        
+        # Reference to queue worker thread puts results in
         self.queue = queue
+        
+        # Reference to the worker thread
         self.tc = threadClient
+        
         self.numPackets = ""
         self.host = ""
         
@@ -73,14 +89,22 @@ class EntropyGUI:
         Label(frame2, text="            ").grid(row=1, column=1, sticky=W)
         # Entrybox to get the host IP
         self.hostIP = StringVar()
+        
         # Find all IP addresses connected to outside world
         ipAddresses = [i[4][0] for i in socket.getaddrinfo(socket.gethostname(), None)]
+        
         # Take the IPv4 addresses only (packet capture code fails for IPv6 addresses)
         ipv4Addresses = []
+        
+        # regex to validate an IP address
         pattern = re.compile("^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
+        
+        # If address matches an IP address add it to ip4Addresses list
         for address in ipAddresses:
             if pattern.match(address) is not None:
                 ipv4Addresses.append(address)
+                
+        # Place the IP addresses in the combo box       
         self.textEntry = Combobox(frame2, textvariable = self.hostIP, state = 'readonly', values = ipv4Addresses)
         self.textEntry.grid(row=1, column=2, sticky=W)
         self.textEntry.current(0)
@@ -125,20 +149,37 @@ class EntropyGUI:
         scrollbar.config(command=self.textArea.yview)
 
 
-    #Callback method activated when the left mouse key clicks the  "Capture
-    # Packet" button
+    # Callback method activated when the left mouse key clicks the 
+    # "Capture Packet" button
+    # Initiates capturing packets and getting and entropy result
     def buttonClickCallback(self, event):
+        # Get the IP address selected
         self.host = self.textEntry.get()
-        self.numPackets = self.numPackts.get()
-        self.tc.getEntropyResult()
         
+        # Get the number of packets user requests
+        self.numPackets = self.numPackts.get()
+        
+        # Capture packets and get entropy result
+        self.tc.getEntropyResult()
+    
+    # Quit option event-handler
+    # Displays a messagebox giving the user the option
+    # to end the program or not
     def exitProgram(self, event=None):
         if tkMessageBox.askokcancel("Quit?", "Really quit?"):
             root.destroy()    
-                
+    
+    # Stop the active thread when the 'Cancel' button is
+    # clicked
+    # ***** This method does not work as intended **
+    # ***** More work is needed to fix this ********
     def cancelButtonEvent(self, event):
         self.tc.killThread()
-
+        
+    # Allow a user to open a file of previous entropy
+    # results and view them in the program
+    # ******Not fully operational  *********************
+    # ******More work needed to finish this feature ****
     def openFile(self):
         filenameforReading = askopenfilename()
         dataManager = EntropyDataManager(filenameforReading)
@@ -146,59 +187,70 @@ class EntropyGUI:
         # clear any current text and place loaded text
         self.textArea.delete(1.0, 'end')
         self.textArea.insert(1.0, newText)
-
+    
+    # Save the entropy results displayed to a text file
+    # ****Works but the text in the file is not formated***
+    # **** in a reader-friendly way ****
+    # **** More work needed to polish this feature ****
     def saveFile(self):
         filenameforWriting = asksaveasfilename()
         dataManager = EntropyDataManager(filenameforWriting)
-        saveText = self.textArea.get(1.0, 'end-1c')  # end-1c prevents final newline character from being saved to file
+        # end-1c prevents final newline character from being saved to file
+        saveText = self.textArea.get(1.0, 'end-1c')
         dataManager.saveFile(saveText)
-        
+    
+    # Display entropy result to user
+    # Get the results that are in the queue and place them
+    # in the textArea
     def processIncoming(self):
-        """Handle all messages currently in the queue, if any."""
-        while self.queue.qsize(  ):
+        while self.queue.qsize( ):
             try:
                 msg = self.queue.get(0)
-                # Check contents of message and do whatever is needed. As a
-                # simple test, print it (in real life, you would
-                # suitably update the GUI's display in a richer fashion).
+                
+                # Insert results in the queue in the textarea
                 self.textArea.insert(Tkinter.END, repr(msg) + "\n")
                 print msg
             except Queue.Empty:
-                # just on general principles, although we don't
-                # expect this branch to be taken in this case
+                # Do nothing
                 pass
-            
+
+
+# Represents a thread client that creates a worker thread that
+# will work asynchronously with the GUI thread.
+# This thread will share the results of it's work with the GUI
+# via a shared queue. This thread periodically yeilds control to
+# the GUI so that it may check the contents of the queue.
 class ThreadedClient:
     def __init__(self, master):
-        """
-        Start the GUI and the asynchronous threads. We are in the main
-        (original) thread of the application, which will later be used by
-        the GUI as well. We spawn a new thread for the worker (I/O).
-        """
-        self.master = master
+
+        self.master = master # TK inter root
         self.pc = PacketCapture()
         
         # Boolean to start/stop recieving entropy result
         self.inEntropyMode = False        
 
         # Create the queue
-        self.queue = Queue.Queue(  )
+        self.queue = Queue.Queue()
 
-        # Set up the GUI part
+        # Set up the GUI part. Share queue contents with the GUI
         self.gui = EntropyGUI(master, self.queue, self.endApplication, self)
 
         # Set up the thread to do asynchronous I/O
         self.running = 1
+        
+        # Create and start the thread
         self.thread1 = threading.Thread(target=self.workerThread1)
-        self.thread1.start(  )
+        self.thread1.start()
 
         # Start the periodic call in the GUI to check if the queue contains
         # anything
-        self.periodicCall(  )        
-        
+        self.periodicCall()        
+    
+    # Sets the boolean variable that puts the thread in
+    # packet capture entropy mode or not
     def getEntropyResult(self):
         self.inEntropyMode = True
-        print"My IP is " + str(self.gui.host) + " In getEntropyResult " + repr(self.inEntropyMode)
+
         
     # Kills thread when cancel button clicked in GUI
     # There's no way of killing thread from outside
@@ -206,36 +258,39 @@ class ThreadedClient:
     # be terminated from outside the thread
     def killThread(self):
         pass
-        
+    
+    # Allows the GUI to check every 200 ms if there is something
+    # new in the queue   
     def periodicCall(self):
-        """
-        Check every 200 ms if there is something new in the queue.
-        """
-        self.gui.processIncoming(  )
+
+        self.gui.processIncoming( )
         if not self.running:
             # This is the brutal stop of the system. You may want to do
             # some cleanup before actually shutting it down.
             self.master.destroy()
         self.master.after(200, self.periodicCall)
 
+    # Captures packets and gets an entropy result
+    # The results are placed in a queue
+    # Thread yeilds control to GUI by sleeping periodically
     def workerThread1(self):
-        """
-        This is where we handle the asynchronous I/O. For example, it may be
-        a 'select(  )'. One important thing to remember is that the thread has
-        to yield control pretty regularly, by select or otherwise.
-        """
+
         while self.running:
             eResult = ""
             if self.inEntropyMode:
                 ip = socket.gethostbyname(self.gui.host)
+                
+                # Capture packets and get entropy result
                 eResult = self.pc.capturePackets(ip, int(self.gui.numPackets))
             
             # yield control to GUI. May need to fine tune this pause
             time.sleep(rand.random(  ) * 1.5)
             
+            # If we have a result put it in the queue
+            # and signal to get out of entropy mode (stop getting results)
             if not eResult == "":
                 self.queue.put("Entropy Result on " + self.gui.numPackets + " Packets: " + str(eResult))
-                inEntropyMode = False
+                self.inEntropyMode = False
 
     def endApplication(self):
         self.running = 0
