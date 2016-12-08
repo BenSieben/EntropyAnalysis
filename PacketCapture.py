@@ -12,6 +12,8 @@ class PacketCapture:
         self.packets = [""]
         self.ipAddr = ""
         self.numPackets = 0
+        
+        # PacketAnalyzer will perform entropy analysis on packets
         self.pa = PacketAnalyzer()
 
     #Capture Packets and add to list    
@@ -64,7 +66,7 @@ class PacketCapture:
                 print packetInfo
                       
         # Perform entropy analysis of packets    
-        entropyResult = self.pa.entropyAnalysis(self.packets)
+        self.pa.entropyAnalysis(self.packets)
         
 
         # if we're on Windows turn off promiscuous mode
