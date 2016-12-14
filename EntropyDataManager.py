@@ -22,7 +22,10 @@ class EntropyDataManager:
     # Saves the given data to what self.filename currently is
     def saveFile(self, data):
         f = open(self.filename, "w")
-        json.dump(data, f)
+        try:
+            json.dump(data, f)
+        except TypeError:
+            print "Error: cannot dump given data (not JSON serializable)!"
 
 
 
