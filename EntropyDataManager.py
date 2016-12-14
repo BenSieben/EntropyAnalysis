@@ -14,7 +14,10 @@ class EntropyDataManager:
     # (returns what json.load obtains)
     def openFile(self):
         f = open(self.filename, "r")
-        return json.load(f)
+        try:
+            return json.load(f)
+        except ValueError:
+            return "Error: selected file is not in JSON format!"
 
     # Saves the given data to what self.filename currently is
     def saveFile(self, data):
